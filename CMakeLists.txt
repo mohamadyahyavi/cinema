@@ -30,6 +30,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(cinemareservation
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        cinema.h cinema.cpp cinema.ui
     )
 else()
     add_executable(cinemareservation ${PROJECT_SOURCES})

@@ -75,8 +75,8 @@
   <widget class="QPushButton" name="pushButtonLogin">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>240</y>
+     <x>290</x>
+     <y>220</y>
      <width>151</width>
      <height>29</height>
     </rect>
@@ -88,8 +88,8 @@
   <widget class="QPushButton" name="pushButtonGoSignUp">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>300</y>
+     <x>270</x>
+     <y>290</y>
      <width>191</width>
      <height>29</height>
     </rect>
@@ -101,10 +101,10 @@
   <widget class="QLabel" name="labelMessage">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>50</x>
      <y>250</y>
-     <width>91</width>
-     <height>81</height>
+     <width>201</width>
+     <height>101</height>
     </rect>
    </property>
    <property name="text">

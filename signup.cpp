@@ -1,14 +1,16 @@
 #include "signup.h"
 #include "ui_signup.h"
-#include "login.h"              // Include login widget for navigation
+#include "login.h"
+#include "cinema.h"       // You’ll create this soon
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 #include <QTimer>
+#include <QCryptographicHash>
 
-SignUp::SignUp(QSqlDatabase db, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::signUp),
-    m_db(db)
+SignUp::SignUp(QSqlDatabase db, QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::signUp)
+    , m_db(db)
 {
     ui->setupUi(this);
 
@@ -17,43 +19,51 @@ SignUp::SignUp(QSqlDatabase db, QWidget *parent) :
     connect(ui->pushButtonGoLogin, &QPushButton::clicked, this, &SignUp::goToLogin);
 }
 
-SignUp::~SignUp() {
+SignUp::~SignUp()
+{
     delete ui;
 }
 
-// Check if the email is already in the database
-bool SignUp::emailExists(const QString &email) {
+// ✅ Check if the email already exists
+bool SignUp::emailExists(const QString &email)
+{
     QSqlQuery query(m_db);
     query.prepare("SELECT id FROM users WHERE email = :email");
     query.bindValue(":email", email);
-    if(!query.exec()) return false;
 
-    return query.next(); // Returns true if email exists
+    if (!query.exec()) {
+        qDebug() << "Email check failed:" << query.lastError().text();
+        return false;
+    }
+
+    return query.next(); // true if an account already exists
 }
 
-// Handle user registration
-void SignUp::handleRegister() {
+// ✅ Handle user registration
+void SignUp::handleRegister()
+{
     QString fullName = ui->lineEditFullName->text().trimmed();
     QString email = ui->lineEditEmail->text().trimmed();
     QString password = ui->lineEditPassword->text().trimmed();
 
-    if(fullName.isEmpty() || email.isEmpty() || password.isEmpty()) {
-        ui->labelMessage->setText("All fields are required.");
+    if (fullName.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        ui->labelMessage->setText("⚠️ All fields are required.");
         return;
     }
 
-    if(emailExists(email)) {
-        ui->labelMessage->setText("An account with this email already exists.");
-
-        // Optional: automatically redirect to login after 1.5s
+    if (emailExists(email)) {
+        ui->labelMessage->setText("⚠️ This email is already registered.");
         QTimer::singleShot(1500, this, &SignUp::goToLogin);
         return;
     }
 
+    // ✅ Hash the password (SHA-256)
+    QByteArray hashedPassword = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex();
+
     // Insert new user into database
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO users(full_name, email, password_hash, role) "
-                  "VALUES(:name, :email, :password, 'user')");
+    query.prepare("INSERT INTO users(full_name, email, password_hash) "
+                  "VALUES(:name, :email, :password) RETURNING id;");
     query.bindValue(":name", fullName);
     query.bindValue(":email", email);
     query.bindValue(":password", password); // TODO: hash password for security
@@ -63,17 +73,25 @@ void SignUp::handleRegister() {
         return;
     }
 
-    ui->labelMessage->setText("Registration successful! You can now log in.");
+    int userId = -1;
+    if (query.next()) {
+        userId = query.value("id").toInt();
+    }
 
-    // Clear input fields
-    ui->lineEditFullName->clear();
-    ui->lineEditEmail->clear();
-    ui->lineEditPassword->clear();
+    ui->labelMessage->setText("Registration successful! Welcome to Cinema!");
+
+// ✅ Open CinemaWidget window
+#include "cinema.h" // make sure this is at the top of the file
+    CinemaWidget *cinemaWin = new CinemaWidget(m_db, userId);
+    cinemaWin->show();
+    this->close();
+
 }
 
-// Navigate to login window
-void SignUp::goToLogin() {
+// ✅ Navigate to login window
+void SignUp::goToLogin()
+{
     Login *loginWin = new Login(m_db);
     loginWin->show();
-    this->close(); // Close the SignUp window
+    this->close();
 }

@@ -8,19 +8,21 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    // --- Connect to PostgreSQL ---
+    // --- Set up PostgreSQL connection ---
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
     db.setHostName("localhost");
-    db.setDatabaseName("cinema");  // your database name
-    db.setUserName("postgres");    // your DB username
-    db.setPassword("muhammad99"); // your DB password
+    db.setPort(5432);               // Optional: explicitly set port
+    db.setDatabaseName("cinema");   // your database name
+    db.setUserName("postgres");     // your DB username
+    db.setPassword("muhammad99");   // your DB password
 
+    // --- Try connecting to the database ---
     if (!db.open()) {
         QMessageBox::critical(nullptr, "Database Error", db.lastError().text());
-        return -1;  // exit if DB connection fails
+        return -1;
     }
 
-    // --- Show Login Widget first ---
+    // --- Launch the Login window ---
     Login loginWindow(db);
     loginWindow.show();
 

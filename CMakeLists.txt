@@ -31,6 +31,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         cinema.h cinema.cpp cinema.ui
+        booking.h booking.cpp booking.ui
     )
 else()
     add_executable(cinemareservation ${PROJECT_SOURCES})

@@ -1,5 +1,7 @@
 #include "cinema.h"
+#include "booking.h"
 #include "ui_cinema.h"
+#include "booking.h"   // Include the Booking widget
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 #include <QLabel>
@@ -100,12 +102,14 @@ void CinemaWidget::showWeek(const QDate &startOfWeek)
                 .arg(end.time().toString("hh:mm"))
             );
 
-        QPushButton *bookBtn = new QPushButton("View Seats");
-        connect(bookBtn, &QPushButton::clicked, [this, showId]() { bookSeat(showId); });
+        QPushButton *viewSeatsBtn = new QPushButton("View Seats");
+        connect(viewSeatsBtn, &QPushButton::clicked, [this, showId]() {
+            openBookingWidget(showId);
+        });
 
         showLayout->addWidget(label);
         showLayout->addStretch();
-        showLayout->addWidget(bookBtn);
+        showLayout->addWidget(viewSeatsBtn);
 
         layout->addWidget(showWidget);
     }
@@ -116,9 +120,12 @@ void CinemaWidget::showWeek(const QDate &startOfWeek)
     }
 }
 
-// Placeholder — this will open the seat selection screen later
-void CinemaWidget::bookSeat(int showId)
+// ✅ Open Booking widget when "View Seats" is clicked
+void CinemaWidget::openBookingWidget(int showId)
 {
-    QMessageBox::information(this, "Show Selected",
-                             QString("You selected show ID: %1").arg(showId));
+    booking *bookingWin = new booking(m_db, m_userId, showId);
+    bookingWin->show();
+
+    // Optional: Close cinema window so only one page is open
+    this->close();
 }
